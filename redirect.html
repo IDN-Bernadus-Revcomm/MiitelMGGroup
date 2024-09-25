@@ -44,23 +44,45 @@
 <body>
     <script>
         window.onload = function() {
-            // Zoho returns the access token in the URL hash (#)
-            const params = new URLSearchParams(window.location.hash.substring(1));  // Extract from URL hash part
-            const accessToken = params.get("access_token");
+            // Extract the authorization code from the URL parameters
+            const params = new URLSearchParams(window.location.search);
+            const authCode = params.get("code");
 
-            if (accessToken) {
-                console.log('Authorization successful:', accessToken);
-                localStorage.setItem("accessToken", accessToken);
+            if (authCode) {
+                console.log('Authorization code received:', authCode);
 
-                // Set expiration time (10 minutes from now)
-                const expirationTime = new Date();
-                expirationTime.setMinutes(expirationTime.getMinutes() + 10);
-                localStorage.setItem("expiredAt", expirationTime.toISOString());
+                // Send the authorization code to your backend to exchange it for an access token
+                fetch('https://zoho-auth-backend.onrender.com/get-access-token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ code: authCode })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.accessToken) {
+                        console.log('Access token received:', data.accessToken);
 
-                // Redirect back to the main app
-                window.location.href = "https://miitel-mg-group.vercel.app";
+                        // Store the access token and expiration time in local storage
+                        localStorage.setItem("accessToken", data.accessToken);
+
+                        // Set token expiration time (e.g., 1 hour from now)
+                        const expirationTime = new Date();
+                        expirationTime.setMinutes(expirationTime.getMinutes() + 60);
+                        localStorage.setItem("expiredAt", expirationTime.toISOString());
+
+                        // Redirect back to your main app
+                        window.location.href = "https://miitel-mg-group.vercel.app";
+                    } else {
+                        console.error("Failed to retrieve access token.");
+                    }
+                })
+                .catch(error => {
+                    console.error('Error exchanging authorization code for access token:', error);
+                });
             } else {
-                console.error("Authorization failed. No access token found.");
+                console.error("Authorization code not found in URL.");
             }
         };
     </script>
