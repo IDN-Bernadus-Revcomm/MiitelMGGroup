@@ -1,4 +1,4 @@
-<html lang="ja">
+<!--<html lang="ja">
 <head>
     <script type="text/javascript">
         // Get the hash part of the URL after the # symbol
@@ -33,4 +33,36 @@
     </script>
 </head>
 <body></body>
+</html>-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>OAuth Redirect</title>
+</head>
+<body>
+    <script>
+        window.onload = function() {
+            // Zoho returns the access token in the URL hash (#)
+            const params = new URLSearchParams(window.location.hash.substring(1));  // Extract from URL hash part
+            const accessToken = params.get("access_token");
+
+            if (accessToken) {
+                console.log('Authorization successful:', accessToken);
+                localStorage.setItem("accessToken", accessToken);
+
+                // Set expiration time (10 minutes from now)
+                const expirationTime = new Date();
+                expirationTime.setMinutes(expirationTime.getMinutes() + 10);
+                localStorage.setItem("expiredAt", expirationTime.toISOString());
+
+                // Redirect back to the main app
+                window.location.href = "https://miitel-mg-group.vercel.app";
+            } else {
+                console.error("Authorization failed. No access token found.");
+            }
+        };
+    </script>
+</body>
 </html>

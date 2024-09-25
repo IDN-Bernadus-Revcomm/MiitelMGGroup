@@ -75,7 +75,7 @@
    <!-- end miitel widget  -->
 
     <script>
-        let sequenceId;
+        /*let sequenceId;
         let isSequenceIdProcessed = false;
 
         function updateReadyState(e) {
@@ -85,10 +85,10 @@
             } else {
                 console.error("Element with id 'readyState' not found.");
             }
-        }
+        }*/
 
         function checkIfTokenExpired() {
-            console.log('Checking token expiration...');
+            /*console.log('Checking token expiration...');
 
             let timeObject = new Date();
             const milliseconds = 10 * 60 * 1000; // 10 minutes in milliseconds
@@ -101,12 +101,23 @@
                 requestAuthorization();
             } else {
                 console.log('Token is still valid:', localStorage.getItem("accessToken"));
+            }*/
+
+            console.log('Checking token expiration...');
+            const accessToken = localStorage.getItem("accessToken");
+            const expiredAt = localStorage.getItem("expiredAt");
+
+            if (!accessToken || new Date(expiredAt) <= new Date()) {
+                console.log('Token is expired or missing. Requesting new authorization...');
+                requestAuthorization();
+            } else {
+                console.log('Token is still valid:', accessToken);
             }
         }
         setInterval(checkIfTokenExpired, 10 * 60 * 1000);
 
         function requestAuthorization() {
-            let timeObject = new Date();
+            /*let timeObject = new Date();
             const milliseconds = 10 * 60 * 1000; // 10 minutes in milliseconds
             timeObject = new Date(timeObject.getTime() + milliseconds);
 
@@ -117,13 +128,22 @@
                 
                 window.location.href = "https://accounts.zoho.com/oauth/v2/auth?" + new URLSearchParams({
                     client_id: "1000.ZF5QQB9I65ZZEA7J9URGH7S5X4ZF1I",
-                    response_type: "code",
+                    response_type: "token",
                     redirect_uri: "https://miitel-mg-group.vercel.app/redirect.html",
                     scope: "Desk.tickets.ALL"
                 });
             } else {
                 console.log('Token is still valid, no need for authorization.');
-            }
+            }*/
+
+            console.log('Requesting new authorization token...');
+            const authUrl = "https://accounts.zoho.com/oauth/v2/auth?" + new URLSearchParams({
+                client_id: "1000.ZF5QQB9I65ZZEA7J9URGH7S5X4ZF1I",
+                response_type: "token", // Use 'token' for implicit grant flow
+                redirect_uri: "https://miitel-mg-group.vercel.app/redirect.html",
+                scope: "Desk.tickets.ALL"
+            });
+            window.location.href = authUrl;
         }
 
         function onAuthorizationSuccess(accessToken) {
@@ -208,8 +228,7 @@
                     }
                 });*/
 
-                console.log("displayPhoneNumber");
-                console.log(e);
+                console.log("Incoming call data:", e);
 
                 // Update UI with incoming data
                 document.getElementById("incomingPhoneNumber").innerHTML = e.phoneNumber;
@@ -262,10 +281,11 @@
                 // Make the API request to create a ticket
                 fetch("https://desk.zoho.com/api/v1/tickets", {
                     method: "POST",
-                    body: JSON.stringify(ticketPayload),
-                    headers: headers
+                    headers: headers,
+                    body: JSON.stringify(ticketPayload)
+                    
                 })
-                .then((response) => {
+                /*.then((response) => {
                  if (!response.ok) {
                     return response.json().then((errorData) => {
                             console.error("Error creating ticket:", errorData);
@@ -274,18 +294,26 @@
                     }
                     return response.json();
                 })
-                /*.then((json) => {
+                .then((json) => {
                 if (!isSequenceIdProcessed) {
                         isSequenceIdProcessed = true;
                         insertMiitelZohoIdMapping(sequenceId, json.id, accessToken);
                     }
-                })*/
+                })
 
                 .then(data => {
                     console.log('Ticket created successfully:', data);
                 })
 
                 .catch((error) => {
+                    console.error("There was a problem with the fetch operation:", error);
+                });*/
+                
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Ticket created successfully:", data);
+                })
+                .catch(error => {
                     console.error("There was a problem with the fetch operation:", error);
                 });
         }
