@@ -259,7 +259,7 @@
                 document.getElementById("incomingIsTransfer").innerHTML = e.isTransfer;
                 document.getElementById("incomingRemotePhoneNumber").innerHTML = e.remotePhoneNumber;
 
-                // Get the access token from local storage
+                /*
                 const accessToken = localStorage.getItem("accessToken");
                 console.log(localStorage); 
                 if (!accessToken) {
@@ -271,7 +271,7 @@
                 const headers = {
                     "Content-Type": "application/json",
                     "orgId": "865953007", 
-                    "Authorization": "Bearer " + accessToken 
+                    "Authorization": "Zoho-oauthtoken " + accessToken 
                 };
 
                 console.log("Headers:", headers);
@@ -326,7 +326,7 @@
 
                 .catch((error) => {
                     console.error("There was a problem with the fetch operation:", error);
-                });*/
+                });
 
                 .then(response => response.json())
                 .then(data => {
@@ -334,7 +334,38 @@
                 })
                 .catch(error => {
                     console.error("There was a problem with the fetch operation:", error);
-                });
+                });*/
+
+                const accessToken = localStorage.getItem("accessToken");
+
+                if (!accessToken) {
+                    console.error("No access token found.");
+                } else {
+                    const phoneNumber = e.phoneNumber; 
+
+                    fetch('https://zoho-auth-backend.onrender.com/create-ticket', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            accessToken: accessToken,
+                            phoneNumber: phoneNumber
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            console.error("Error creating ticket:", data);
+                        } else {
+                            console.log("Ticket created successfully:", data);
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error creating ticket:", error);
+                    });
+                }
+
         }
         miitelWidget("onReceiveCall", displayPhoneNumber);
 
