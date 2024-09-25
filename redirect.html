@@ -1,21 +1,36 @@
 <html lang="ja">
 <head>
     <script type="text/javascript">
+        // Get the hash part of the URL after the # symbol
         var hash = window.location.hash.substring(1);
-        var params = {}
+        var params = {};
+
+        // Parse the hash parameters and store them in the params object
         hash.split('&').map(hk => { 
-        let temp = hk.split('='); 
-            params[temp[0]] = temp[1] 
+            let temp = hk.split('='); 
+            params[temp[0]] = temp[1];
         });
 
-        let timeObject = new Date();
-        const milliseconds = params.expires_in * 1000; // 10 seconds = 10000 milliseconds
-        timeObject = new Date(timeObject.getTime() + milliseconds);
+        // Check if access token and expires_in are present
+        if (params.access_token && params.expires_in) {
+            // Set the expiration time of the token
+            let timeObject = new Date();
+            const milliseconds = params.expires_in * 1000; // expires_in is in seconds
+            timeObject = new Date(timeObject.getTime() + milliseconds);
 
-        localStorage.setItem("accessToken", params.access_token);
-        localStorage.setItem("expiredAt", timeObject);
-        location.assign(window.location.origin);
-     </script>
-     <body></body>
+            // Store the access token and expiration time in local storage
+            localStorage.setItem("accessToken", params.access_token);
+            localStorage.setItem("expiredAt", timeObject);
+
+            // Redirect the user back to the main page (you can change this)
+            location.assign(window.location.origin);
+        } else {
+            // If token isn't found, handle the error
+            console.error("Access token or expires_in not found in the URL hash.");
+            // Optionally, redirect to an error page
+            // location.assign('/error-page');
+        }
+    </script>
 </head>
+<body></body>
 </html>

@@ -131,7 +131,7 @@
 
         // 着信パラメータの取得イベント
         function displayPhoneNumber(e) {
-            console.log("displayPhoneNumber");
+            /*console.log("displayPhoneNumber");
             console.log(e);
             document.getElementById("incomingPhoneNumber").innerHTML = e.phoneNumber;
             document.getElementById("incomingGroupName").innerHTML = e.groupName;
@@ -179,6 +179,86 @@
                         isSequenceIdProcessed = true;
                         insertMiitelZohoIdMapping(sequenceId, json.id, localStorage.getItem("accessToken"));
                     }
+                });*/
+
+                console.log("displayPhoneNumber");
+                console.log(e);
+
+                // Update UI with incoming data
+                document.getElementById("incomingPhoneNumber").innerHTML = e.phoneNumber;
+                document.getElementById("incomingGroupName").innerHTML = e.groupName;
+                document.getElementById("incomingUserName").innerHTML = e.userName;
+                document.getElementById("incomingCircuitTitle").innerHTML = e.circuitTitle;
+                document.getElementById("incomingCircuitNumber").innerHTML = e.circuitNumber;
+                document.getElementById("incomingIsInternal").innerHTML = e.isInternal;
+                document.getElementById("incomingIsTransfer").innerHTML = e.isTransfer;
+                document.getElementById("incomingRemotePhoneNumber").innerHTML = e.remotePhoneNumber;
+
+                // Get the access token from local storage
+                const accessToken = localStorage.getItem("accessToken");
+                if (!accessToken) {
+                    console.error("Access token is missing.");
+                    return;
+                }
+
+                // Create the headers object
+                const headers = {
+                    "Content-Type": "application/json",
+                    "orgId": "1040287000000139001",
+                    "Authorization": "Bearer " + accessToken
+                };
+
+                // Set the due date dynamically (for example, 1 day from now)
+                const dueDate = new Date();
+                dueDate.setDate(dueDate.getDate() + 1);  // Set due date 1 day from now
+                const formattedDueDate = dueDate.toISOString();
+
+                // Prepare the payload for the API request
+                const ticketPayload = {
+                    subCategory: "Sub General",
+                    cf: {
+                        cf_mtl_phone_number : e.phoneNumber,
+                        cf_mtl_group_name : e.groupName,
+                        cf_mtl_username : e.userName,
+                        cf_mtl_circuit_title : e.circuitTitle,
+                        cf_mtl_circuit_number : e.circuitNumber,
+                        cf_mtl_is_internal : e.isInternal,
+                        cf_mtl_is_transfer : e.isTransfer,
+                        cf_mtl_remote_phone_number : e.remotePhoneNumber
+                    },
+                    contactId: "995116000000268029",  // Replace with your actual contact ID
+                    subject: "Ticket " + Math.floor(100000000 + Math.random() * 900000000),
+                    dueDate: formattedDueDate,  // Use dynamically set due date
+                    departmentId: "995116000000006907",  // Replace with your actual department ID
+                    channel: "Email",
+                    language: "English",
+                    priority: "High",
+                    classification: "",  // Optional
+                    phone: e.phoneNumber,
+                    category: "general",
+                    status: "Open"
+                };
+
+                // Make the API request to create a ticket
+                fetch("https://desk.zoho.com/api/v1/tickets", {
+                    method: "POST",
+                    body: JSON.stringify(ticketPayload),
+                    headers: headers
+                })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok: " + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then((json) => {
+                    if (!isSequenceIdProcessed) {
+                        isSequenceIdProcessed = true;
+                        insertMiitelZohoIdMapping(sequenceId, json.id, accessToken);
+                    }
+                })
+                .catch((error) => {
+                    console.error("There was a problem with the fetch operation:", error);
                 });
         }
         miitelWidget("onReceiveCall", displayPhoneNumber);
