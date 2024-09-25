@@ -1,0 +1,61 @@
+<html lang="ja">
+<head>
+    <script type="text/javascript">
+        var hash = window.location.hash.substring(1);
+        var params = {}
+        hash.split('&').map(hk => { 
+        let temp = hk.split('='); 
+            params[temp[0]] = temp[1] 
+        });
+
+        let timeObject = new Date();
+        const milliseconds = params.expires_in * 1000; // 10 seconds = 10000 milliseconds
+        timeObject = new Date(timeObject.getTime() + milliseconds);
+
+        localStorage.setItem("accessToken", params.access_token);
+        localStorage.setItem("expiredAt", timeObject);
+        location.assign(window.location.origin);
+        // const params = new URLSearchParams(window.location.search);
+        // localStorage.setItem("code", params.get('code'));
+
+        // fetch("https://accounts.zoho.com/oauth/v2/token?" + new URLSearchParams({
+        //             code: params.get('code'),
+        //             grant_type: "authorization_code",
+        //             client_id: "1000.OTCNIQWRSXUCQZ6AEOEZ6N00AMWZ8J",
+        //             client_secret: "b3452e36505bd9e92afbeb89991b0e4e3a19318b62",
+        //             redirect_uri: "https://miitel.vercel.app/redirect.html"
+        //         }), 
+        //         {
+        //             mode:"cors",
+        //             method: "POST",
+        //             headers: {
+        //                 "Access-Control-Allow-Credentials": "true",
+        //                 "Access-Control-Allow-Origin": "*",
+        //                 "Access-Control-Allow-Methods": "GET,OPTIONS,PATCH,DELETE,POST,PUT",
+        //                 "Access-Control-Allow-Headers": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version",
+        //         }
+        //         })
+        //         .then((response) => console.log('ape', response));
+
+        // fetch("https://desk.zoho.com/api/v1/departments?" + new URLSearchParams({
+        //         isEnabled: "true",
+        //         chatStatus: "AVAILABLE"
+        //         }), 
+        //         {
+        //             method: "GET",
+        //             headers: {
+        //                 "orgId": "854043261",
+        //                 "Authorization": "Zoho-oauthtoken " + params.access_token
+        //         }
+        //         })
+        //         .then((response) => response.json())
+        //         .then((json) => console.log('hasil', json));
+
+        // const accessToken = getAccessTokenFromUrl(window.location)
+        // localStorage.setItem("app", accessToken)
+        // const redirectUrl = window.location.href.split('oauthCallback')[0];
+        // location.assign(redirectUrl);
+     </script>
+     <body></body>
+</head>
+</html>

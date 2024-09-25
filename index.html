@@ -1,0 +1,239 @@
+﻿<html lang="ja">
+<head>
+    <style>
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+        }
+    </style>
+</head>
+
+<body onload="requestAuthorization()">
+    <!--<h1> Widget Embedded</h1>
+    <table border="1" width="80%">
+        <tr>
+            <th>Company Name</th>
+            <th>Full Name</th>
+            <th>Department</th>
+            <th>Contact Address</th>
+        </tr>
+        <tr>
+            <td>PT. A</td>
+            <td>Radif</td>
+            <td>IT Department</td>
+            <td><a href="javascript:miitelWidget.call('081316550090');">081316550090</a></td>
+        </tr>
+        <tr>
+            <td>PT. B</td>
+            <td>Gito Wahyudi</td>
+            <td>Penipu Department</td>
+            <td><a href="#" onclick="outboundCall2('081316550090')">081316550090</a></td>
+        </tr>
+    </table><br />
+
+    <h4>Can you send a call?</h4>
+    <p>
+        State: <span id="readyState">false</span>
+    </p>
+
+    <h4>Outgoing</h4>
+    <p>
+        Phone Number<input type="text" id="outboundPhoneNumber" />
+        Company Name<input type="text" id="outboundCompanyName" />
+        PIC Name<input type="text" id="outboundContactPersonName" />
+        <button onClick="outboundCall()">Outgoing</button>
+    </p>
+
+    <h4>Call Ended</h4>
+    <p>
+        <button onClick="hangUpFunc()">Hang Up</button>
+    </p>
+-->
+
+    <h4>Unique ID (sequence ID) of call response history</h4>
+    <p>
+        Sequence ID: <span id="sequenceId"></span>
+    </p>
+
+    <h4>Incoming Call Information</h4>
+    <ul>
+        <li>Caller phone number ：<span id="incomingPhoneNumber"></span></li>
+        <li>Destination Group Name：<span id="incomingGroupName"></span></li>
+        <li>Destination User Name：<span id="incomingUserName"></span></li>
+        <li>Destination Line Name：<span id="incomingCircuitTitle"></span></li>
+        <li>Destination Phone Number：<span id="incomingCircuitNumber"></span></li>
+        <li>Is it an extension?：<span id="incomingIsInternal"></span></li>
+        <li>Whether it is an extension transfer?：<span id="incomingIsTransfer"></span></li>
+        <li>Transfer source phone number (only for internal transfer)：<span id="incomingRemotePhoneNumber"></span></li>
+    </ul>
+    <!-- begin miitel widget  -->
+    <script>
+        window.miitelWidget = window.miitelWidget || function(k, v){ miitelWidget.conf = miitelWidget.conf || {}; miitelWidget.conf[k] = v; }
+        miitelWidget("company_id", "idncustomersupport-id");
+        miitelWidget("access_key", "27b45be3-72c7-465a-9810-5d618355fc6e");
+   </script>
+   <script async src="https://api.miitel.jp/static/widget/v1.js"></script>
+   <!-- end miitel widget  -->
+
+    <script>
+        let sequenceId;
+        let isSequenceIdProcessed = false;
+
+        function checkIfTokenExpired() {
+            console.log('Checking token expiration...')
+
+            let timeObject = new Date();
+            const milliseconds = 1200 * 1000; // 10 seconds = 10000 milliseconds
+            timeObject = new Date(timeObject.getTime() + milliseconds);
+            
+            if (localStorage.getItem("accessToken") === null || 
+                (localStorage.getItem("accessToken") !== null && Date.parse(localStorage.getItem("expiredAt")) < timeObject.getTime())) {
+                requestAuthorization();
+            }
+        }
+        setInterval(checkIfTokenExpired, 5000);
+
+        function requestAuthorization() {
+            let timeObject = new Date();
+            const milliseconds = 1200 * 1000; // 10 seconds = 10000 milliseconds
+            timeObject = new Date(timeObject.getTime() + milliseconds);
+
+            if (localStorage.getItem("accessToken") === null || 
+                (localStorage.getItem("accessToken") !== null && Date.parse(localStorage.getItem("expiredAt")) < timeObject.getTime())) {
+                window.location.href = "https://accounts.zoho.com/oauth/v2/auth?" + new URLSearchParams({
+                        client_id: "1000.OTCNIQWRSXUCQZ6AEOEZ6N00AMWZ8J",
+                        response_type: "token",
+                        prompt: "consent",
+                        redirect_uri: "https://miitel.vercel.app/redirect.html",
+                        scope: "Desk.tickets.ALL,Desk.contacts.ALL,Desk.settings.ALL,Desk.basic.READ,Desk.basic.CREATE",
+                        state: "5466400890088961855"
+                    });                
+            }
+        }
+        // 架電イベント　入力発信
+        function outboundCall() {
+            var phoneNumber = document.getElementById("outboundPhoneNumber").value;
+            var companyName = document.getElementById("outboundCompanyName").value;
+            var contactPersonName = document.getElementById("outboundContactPersonName").value;
+            miitelWidget.call(phoneNumber, { contact: { companyName, contactPersonName} });
+        }
+
+        // 架電イベント2 クリックtoコール
+        function outboundCall2(phoneNumber) {
+            miitelWidget.call(phoneNumber);
+        }
+
+        // 通話終了イベント
+        function hangUpFunc(){
+            miitelWidget.hangup();
+        }
+
+        // 着信パラメータの取得イベント
+        function displayPhoneNumber(e) {
+            console.log("displayPhoneNumber");
+            console.log(e);
+            document.getElementById("incomingPhoneNumber").innerHTML = e.phoneNumber;
+            document.getElementById("incomingGroupName").innerHTML = e.groupName;
+            document.getElementById("incomingUserName").innerHTML = e.userName;
+            document.getElementById("incomingCircuitTitle").innerHTML = e.circuitTitle;
+            document.getElementById("incomingCircuitNumber").innerHTML = e.circuitNumber;
+            document.getElementById("incomingIsInternal").innerHTML = e.isInternal;
+            document.getElementById("incomingIsTransfer").innerHTML = e.isTransfer;
+            document.getElementById("incomingRemotePhoneNumber").innerHTML = e.remotePhoneNumber;
+
+            fetch("https://desk.zoho.com/api/v1/tickets", {
+                method: "POST",
+                body: JSON.stringify({
+                    subCategory: "Sub General",
+                    cf: {
+                        cf_mtl_phone_number : e.phoneNumber,
+                        cf_mtl_group_name : e.groupName,
+                        cf_mtl_username : e.userName,
+                        cf_mtl_circuit_title : e.circuitTitle,
+                        cf_mtl_circuit_number : e.circuitNumber,
+                        cf_mtl_is_internal : e.isInternal,
+                        cf_mtl_is_transfer : e.isTransfer,
+                        cf_mtl_remote_phone_number : e.remotePhoneNumber
+                    },
+                    contactId: "995116000000268029",
+                    subject: "Ticket " + Math.floor(100000000 + Math.random() * 900000000),
+                    dueDate: "2016-06-21T16:16:16.000Z",
+                    departmentId: "995116000000006907",
+                    channel: "Email",
+                    language: "English",
+                    priority: "High",
+                    classification: "",
+                    phone: e.phoneNumber,
+                    category: "general",
+                    status: "Open"
+                }),
+                headers: {
+                    "orgId": "854043261",
+                    "Authorization": "Zoho-oauthtoken " + localStorage.getItem("accessToken")
+                }
+                })
+                .then((response) => response.json())
+                .then((json) => {
+                    if(!isSequenceIdProcessed){
+                        isSequenceIdProcessed = true;
+                        insertMiitelZohoIdMapping(sequenceId, json.id, localStorage.getItem("accessToken"));
+                    }
+                });
+        }
+        miitelWidget("onReceiveCall", displayPhoneNumber);
+
+        function insertMiitelZohoIdMapping(miitel_id, zoho_ticket_id, access_token){
+            fetch("https://miitel-be.onrender.com/api/sqlDataMapping/insertMiitelZohoIdMapping", {
+                method: "POST",
+                body: JSON.stringify({
+                    miitel_id: miitel_id,
+                    zoho_ticket_id: zoho_ticket_id,
+                    access_token: access_token
+                }),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+                })
+                .then((response) => response.json())
+                .then((json) => console.log('insert ', json));
+        }
+        // ステータス更新イベント
+        function updateReadyState(e) {
+            console.log("updateReadyState")
+            document.getElementById("readyState").innerHTML = e.state;
+        }
+        miitelWidget("onChangeReadyState", updateReadyState);
+
+        // 応対履歴の固有ID（シーケンスID）取得イベント
+        function receiveSequenceId(e) {
+            sequenceId = e.sequenceId;
+            isSequenceIdProcessed = false;
+            console.log("receiveSequenceId")
+            //URLのXXXXXXXを貴社の企業IDに置き換えてご利用ください。
+            // document.getElementById("sequenceId").innerHTML = "https://XXXXXXX.miitel.jp/app/call/" + e.sequenceId;
+            
+            document.getElementById("sequenceId").innerHTML = e.sequenceId;
+        }
+
+        // ダイヤル開始イベント
+        function dialBegin(e) {
+            console.log("dialBegin");
+        }
+
+        // コール開始イベント
+        function callBegin(e) {
+            console.log("callBegin");
+        }
+
+        // コール終了イベント
+        function callEnd(e) {
+            console.log("callEnd");
+        }
+
+        miitelWidget("onReceiveSequenceId", receiveSequenceId);
+        miitelWidget("onDialBegin", dialBegin);
+        miitelWidget("onCallBegin", callBegin);
+        miitelWidget("onCallEnd", callEnd);
+
+    </script>
+</body>
+</html>
