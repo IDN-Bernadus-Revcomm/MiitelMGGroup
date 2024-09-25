@@ -216,28 +216,15 @@
 
                 // Prepare the payload for the API request
                 const ticketPayload = {
-                    subCategory: "Sub General",
-                    cf: {
-                        cf_mtl_phone_number : e.phoneNumber,
-                        cf_mtl_group_name : e.groupName,
-                        cf_mtl_username : e.userName,
-                        cf_mtl_circuit_title : e.circuitTitle,
-                        cf_mtl_circuit_number : e.circuitNumber,
-                        cf_mtl_is_internal : e.isInternal,
-                        cf_mtl_is_transfer : e.isTransfer,
-                        cf_mtl_remote_phone_number : e.remotePhoneNumber
-                    },
+                    subject: "Ticket from Phone Number: " + e.phoneNumber,
                     contactId: "1040287000000287180",  // Replace with your actual contact ID
-                    subject: "Ticket " + Math.floor(100000000 + Math.random() * 900000000),
-                    dueDate: formattedDueDate,  // Use dynamically set due date
                     departmentId: "1040287000000006907",  // Replace with your actual department ID
-                    channel: "Email",
-                    language: "English",
+                    description: "Ticket created for phone number: " + e.phoneNumber,
                     priority: "High",
-                    classification: "",  // Optional
-                    phone: e.phoneNumber,
-                    category: "general",
-                    status: "Open"
+                    status: "Open",
+                    channel: "Phone",
+                    phone: e.phoneNumber,  // Use phone number directly
+                    dueDate: formattedDueDate  // Set due date for 1 day from now
                 };
 
                 // Make the API request to create a ticket
@@ -247,13 +234,16 @@
                     headers: headers
                 })
                 .then((response) => {
-                    if (!response.ok) {
-                        throw new Error("Network response was not ok: " + response.statusText);
+                 if (!response.ok) {
+                    return response.json().then((errorData) => {
+                            console.error("Error creating ticket:", errorData);
+                            throw new Error("Network response was not ok: " + response.statusText);
+                        });
                     }
                     return response.json();
                 })
                 .then((json) => {
-                    if (!isSequenceIdProcessed) {
+                if (!isSequenceIdProcessed) {
                         isSequenceIdProcessed = true;
                         insertMiitelZohoIdMapping(sequenceId, json.id, accessToken);
                     }
