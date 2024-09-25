@@ -78,11 +78,13 @@
         let sequenceId;
         let isSequenceIdProcessed = false;
 
-        let readyStateElement = document.getElementById("readyState");
-        if (readyStateElement) {
-            readyStateElement.innerHTML = e.state;
-        } else {
-            console.error("Element with id 'readyState' not found.");
+        function updateReadyState(e) {
+            let readyStateElement = document.getElementById("readyState");
+            if (readyStateElement) {
+                readyStateElement.innerHTML = e.state;
+            } else {
+                console.error("Element with id 'readyState' not found.");
+            }
         }
 
         function checkIfTokenExpired() {
@@ -98,7 +100,7 @@
                 console.log('Token is expired or missing. Requesting new authorization...');
                 requestAuthorization();
             } else {
-                console.log('Token is still valid.');
+                console.log('Token is still valid:', localStorage.getItem("accessToken"));
             }
         }
         setInterval(checkIfTokenExpired, 10 * 60 * 1000);
@@ -221,6 +223,7 @@
 
                 // Get the access token from local storage
                 const accessToken = localStorage.getItem("accessToken");
+                console.log(localStorage); 
                 if (!accessToken) {
                     console.error("Access token is missing.");
                     return;
@@ -229,10 +232,12 @@
                 // Create the headers object
                 const headers = {
                     "Content-Type": "application/json",
-                    //"orgId": "1040287000000139001",
-                    "orgId": "865953007",
-                    "Authorization": "Bearer " + accessToken
+                    "orgId": "865953007", 
+                    "Authorization": "Bearer " + accessToken 
                 };
+
+                console.log("Headers:", headers);
+                console.log("Access Token:", accessToken);
 
                 // Set the due date dynamically (for example, 1 day from now)
                 const dueDate = new Date();
@@ -251,6 +256,8 @@
                     phone: e.phoneNumber,  // Use phone number directly
                     dueDate: formattedDueDate  // Set due date for 1 day from now
                 };
+
+                console.log("Payload:", ticketPayload);
 
                 // Make the API request to create a ticket
                 fetch("https://desk.zoho.com/api/v1/tickets", {
