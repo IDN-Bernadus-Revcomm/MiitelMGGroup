@@ -204,7 +204,8 @@
                 // Create the headers object
                 const headers = {
                     "Content-Type": "application/json",
-                    "orgId": "1040287000000139001",
+                    //"orgId": "1040287000000139001",
+                    "orgId": "865953007",
                     "Authorization": "Bearer " + accessToken
                 };
 
@@ -226,10 +227,10 @@
                         cf_mtl_is_transfer : e.isTransfer,
                         cf_mtl_remote_phone_number : e.remotePhoneNumber
                     },
-                    contactId: "995116000000268029",  // Replace with your actual contact ID
+                    contactId: "1040287000000287180",  // Replace with your actual contact ID
                     subject: "Ticket " + Math.floor(100000000 + Math.random() * 900000000),
                     dueDate: formattedDueDate,  // Use dynamically set due date
-                    departmentId: "995116000000006907",  // Replace with your actual department ID
+                    departmentId: "1040287000000006907",  // Replace with your actual department ID
                     channel: "Email",
                     language: "English",
                     priority: "High",
