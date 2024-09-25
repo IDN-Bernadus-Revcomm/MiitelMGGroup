@@ -103,16 +103,26 @@
                 console.log('Token is still valid:', localStorage.getItem("accessToken"));
             }*/
 
-            console.log('Checking token expiration...');
             const accessToken = localStorage.getItem("accessToken");
             const expiredAt = localStorage.getItem("expiredAt");
 
-            if (!accessToken || new Date(expiredAt) <= new Date()) {
-                console.log('Token is expired or missing. Requesting new authorization...');
-                requestAuthorization();
+            if (accessToken && expiredAt) {
+                const now = new Date();
+                const expirationDate = new Date(expiredAt);
+
+                // Check if token is still valid
+                if (now < expirationDate) {
+                    console.log("Token is still valid, no need for authorization.");
+                    return accessToken;
+                } else {
+                    console.log("Token has expired, requesting new authorization.");
+                }
             } else {
-                console.log('Token is still valid:', accessToken);
+                console.log("No token found, requesting new authorization.");
             }
+
+            // If token is missing or expired, start the OAuth flow
+            requestAuthorization();
         }
         setInterval(checkIfTokenExpired, 10 * 60 * 1000);
 
@@ -145,6 +155,15 @@
             });
             window.location.href = authUrl;
         }
+
+        window.onload = function() {
+            const accessToken = checkIfTokenExpired();
+
+            if (accessToken) {
+                // Continue with your app logic here if the token is valid
+                console.log("Access token:", accessToken);
+            }
+        };
 
         function onAuthorizationSuccess(accessToken) {
             console.log('Authorization successful, new access token:', accessToken);
