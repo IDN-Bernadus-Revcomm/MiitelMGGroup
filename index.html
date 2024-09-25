@@ -101,10 +101,11 @@
             if (localStorage.getItem("accessToken") === null || 
                 (localStorage.getItem("accessToken") !== null && Date.parse(localStorage.getItem("expiredAt")) < timeObject.getTime())) {
                 window.location.href = "https://accounts.zoho.com/oauth/v2/auth?" + new URLSearchParams({
-                        client_id: "1000.OTCNIQWRSXUCQZ6AEOEZ6N00AMWZ8J",
+                        //client_id: "1000.OTCNIQWRSXUCQZ6AEOEZ6N00AMWZ8J",
+                        client_id: "1000.ZF5QQB9I65ZZEA7J9URGH7S5X4ZF1I",
                         response_type: "token",
                         prompt: "consent",
-                        redirect_uri: "https://miitel.vercel.app/redirect.html",
+                        redirect_uri: "https://miitel-mg-group.vercel.app/redirect.html",
                         scope: "Desk.tickets.ALL,Desk.contacts.ALL,Desk.settings.ALL,Desk.basic.READ,Desk.basic.CREATE",
                         state: "5466400890088961855"
                     });                
@@ -183,7 +184,7 @@
         miitelWidget("onReceiveCall", displayPhoneNumber);
 
         function insertMiitelZohoIdMapping(miitel_id, zoho_ticket_id, access_token){
-            fetch("https://miitel-be.onrender.com/api/sqlDataMapping/insertMiitelZohoIdMapping", {
+            /*fetch("https://miitel-be.onrender.com/api/sqlDataMapping/insertMiitelZohoIdMapping", {
                 method: "POST",
                 body: JSON.stringify({
                     miitel_id: miitel_id,
@@ -195,8 +196,9 @@
                 }
                 })
                 .then((response) => response.json())
-                .then((json) => console.log('insert ', json));
+                .then((json) => console.log('insert ', json));*/
         }
+
         // ステータス更新イベント
         function updateReadyState(e) {
             console.log("updateReadyState")
