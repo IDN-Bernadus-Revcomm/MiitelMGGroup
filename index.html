@@ -7,8 +7,7 @@
     </style>
 </head>
 
-<!--<body onload="requestAuthorization()">-->
-    <body>
+    <body onload="requestAuthorization()">
     <!--<h1> Widget Embedded</h1>
     <table border="1" width="80%">
         <tr>
@@ -80,37 +79,56 @@
         let isSequenceIdProcessed = false;
 
         function checkIfTokenExpired() {
-            console.log('Checking token expiration...')
+            console.log('Checking token expiration...');
 
             let timeObject = new Date();
-            const milliseconds = 1200 * 1000; // 10 seconds = 10000 milliseconds
+            const milliseconds = 10 * 60 * 1000; // 10 minutes in milliseconds
             timeObject = new Date(timeObject.getTime() + milliseconds);
-            
+
+            // Check if the token is missing or expired
             if (localStorage.getItem("accessToken") === null || 
                 (localStorage.getItem("accessToken") !== null && Date.parse(localStorage.getItem("expiredAt")) < timeObject.getTime())) {
+                console.log('Token is expired or missing. Requesting new authorization...');
                 requestAuthorization();
+            } else {
+                console.log('Token is still valid.');
             }
         }
-        setInterval(checkIfTokenExpired, 5000);
+        setInterval(checkIfTokenExpired, 10 * 60 * 1000);
 
         function requestAuthorization() {
             let timeObject = new Date();
-            const milliseconds = 1200 * 1000; // 10 seconds = 10000 milliseconds
+            const milliseconds = 10 * 60 * 1000; // 10 minutes in milliseconds
             timeObject = new Date(timeObject.getTime() + milliseconds);
 
             if (localStorage.getItem("accessToken") === null || 
                 (localStorage.getItem("accessToken") !== null && Date.parse(localStorage.getItem("expiredAt")) < timeObject.getTime())) {
+                // Request new authorization
+                console.log('Requesting new authorization token...');
+                
                 window.location.href = "https://accounts.zoho.com/oauth/v2/auth?" + new URLSearchParams({
-                        //client_id: "1000.OTCNIQWRSXUCQZ6AEOEZ6N00AMWZ8J",
-                        client_id: "1000.ZF5QQB9I65ZZEA7J9URGH7S5X4ZF1I",
-                        //response_type: "token",
-                        response_type: "code",
-                        //prompt: "consent",
-                        redirect_uri: "https://miitel-mg-group.vercel.app/redirect.html",
-                        scope: "Desk.tickets.ALL"
-                    });                
+                    client_id: "1000.ZF5QQB9I65ZZEA7J9URGH7S5X4ZF1I",
+                    response_type: "code",
+                    redirect_uri: "https://miitel-mg-group.vercel.app/redirect.html",
+                    scope: "Desk.tickets.ALL"
+                });
+            } else {
+                console.log('Token is still valid, no need for authorization.');
             }
         }
+
+        function onAuthorizationSuccess(accessToken) {
+            console.log('Authorization successful, new access token:', accessToken);
+            localStorage.setItem("accessToken", accessToken);
+
+            // Calculate and store expiration time
+            let expirationTime = new Date();
+            const expirationMilliseconds = 10 * 60 * 1000; // 10 minutes in milliseconds
+            expirationTime = new Date(expirationTime.getTime() + expirationMilliseconds);
+            localStorage.setItem("expiredAt", expirationTime);
+            console.log('Token expiration time set to:', expirationTime);
+        }
+
         // 架電イベント　入力発信
         function outboundCall() {
             var phoneNumber = document.getElementById("outboundPhoneNumber").value;
