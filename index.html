@@ -78,6 +78,13 @@
         let sequenceId;
         let isSequenceIdProcessed = false;
 
+        let readyStateElement = document.getElementById("readyState");
+        if (readyStateElement) {
+            readyStateElement.innerHTML = e.state;
+        } else {
+            console.error("Element with id 'readyState' not found.");
+        }
+
         function checkIfTokenExpired() {
             console.log('Checking token expiration...');
 
@@ -255,17 +262,22 @@
                  if (!response.ok) {
                     return response.json().then((errorData) => {
                             console.error("Error creating ticket:", errorData);
-                            throw new Error("Network response was not ok: " + response.statusText);
+                            throw new Error("Failed to create ticket: " + errorData.message);
                         });
                     }
                     return response.json();
                 })
-                .then((json) => {
+                /*.then((json) => {
                 if (!isSequenceIdProcessed) {
                         isSequenceIdProcessed = true;
                         insertMiitelZohoIdMapping(sequenceId, json.id, accessToken);
                     }
+                })*/
+
+                .then(data => {
+                    console.log('Ticket created successfully:', data);
                 })
+
                 .catch((error) => {
                     console.error("There was a problem with the fetch operation:", error);
                 });
