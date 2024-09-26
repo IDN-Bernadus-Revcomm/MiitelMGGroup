@@ -75,6 +75,7 @@
    <!-- end miitel widget  -->
 
     <script>
+        let sequenceId = null;
         /*let sequenceId;
         let isSequenceIdProcessed = false;
 
@@ -119,10 +120,9 @@
                 }
             } else {
                 console.log("No token found, requesting new authorization.");
+                requestAuthorization();
+                return null;
             }
-
-            // If token is missing or expired, start the OAuth flow
-            requestAuthorization();
         }
         setInterval(checkIfTokenExpired, 10 * 60 * 1000);
 
@@ -340,31 +340,32 @@
 
                 if (!accessToken) {
                     console.error("No access token found.");
-                } else {
-                    const phoneNumber = e.phoneNumber; 
+                    return;
+                } 
+                const phoneNumber = e.phoneNumber; 
 
-                    fetch('https://zoho-auth-backend.onrender.com/create-ticket', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            accessToken: accessToken,
-                            phoneNumber: phoneNumber
-                        })
+                fetch('https://zoho-auth-backend.onrender.com/create-ticket', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        accessToken: accessToken,
+                        sequenceId: sequenceId
+                        //phoneNumber: phoneNumber
                     })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.error) {
-                            console.error("Error creating ticket:", data);
-                        } else {
-                            console.log("Ticket created successfully:", data);
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error creating ticket:", error);
-                    });
-                }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        console.error("Error creating ticket:", data);
+                    } else {
+                        console.log("Ticket created successfully:", data);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error creating ticket:", error);
+                });
 
         }
         miitelWidget("onReceiveCall", displayPhoneNumber);
@@ -396,7 +397,7 @@
         function receiveSequenceId(e) {
             sequenceId = e.sequenceId;
             isSequenceIdProcessed = false;
-            console.log("receiveSequenceId")
+            console.log("receiveSequenceId", sequenceId);
             //URLのXXXXXXXを貴社の企業IDに置き換えてご利用ください。
             // document.getElementById("sequenceId").innerHTML = "https://XXXXXXX.miitel.jp/app/call/" + e.sequenceId;
             
