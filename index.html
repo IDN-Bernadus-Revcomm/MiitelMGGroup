@@ -89,20 +89,6 @@
         }*/
 
         function checkIfTokenExpired() {
-            /*console.log('Checking token expiration...');
-
-            let timeObject = new Date();
-            const milliseconds = 10 * 60 * 1000; // 10 minutes in milliseconds
-            timeObject = new Date(timeObject.getTime() + milliseconds);
-
-            // Check if the token is missing or expired
-            if (localStorage.getItem("accessToken") === null || 
-                (localStorage.getItem("accessToken") !== null && Date.parse(localStorage.getItem("expiredAt")) < timeObject.getTime())) {
-                console.log('Token is expired or missing. Requesting new authorization...');
-                requestAuthorization();
-            } else {
-                console.log('Token is still valid:', localStorage.getItem("accessToken"));
-            }*/
 
             const accessToken = localStorage.getItem("accessToken");
             const expiredAt = localStorage.getItem("expiredAt");
@@ -127,24 +113,6 @@
         setInterval(checkIfTokenExpired, 10 * 60 * 1000);
 
         function requestAuthorization() {
-            /*let timeObject = new Date();
-            const milliseconds = 10 * 60 * 1000; // 10 minutes in milliseconds
-            timeObject = new Date(timeObject.getTime() + milliseconds);
-
-            if (localStorage.getItem("accessToken") === null || 
-                (localStorage.getItem("accessToken") !== null && Date.parse(localStorage.getItem("expiredAt")) < timeObject.getTime())) {
-                // Request new authorization
-                console.log('Requesting new authorization token...');
-                
-                window.location.href = "https://accounts.zoho.com/oauth/v2/auth?" + new URLSearchParams({
-                    client_id: "1000.ZF5QQB9I65ZZEA7J9URGH7S5X4ZF1I",
-                    response_type: "token",
-                    redirect_uri: "https://miitel-mg-group.vercel.app/redirect.html",
-                    scope: "Desk.tickets.ALL"
-                });
-            } else {
-                console.log('Token is still valid, no need for authorization.');
-            }*/
 
             console.log('Requesting new authorization token...');
             const authUrl = "https://accounts.zoho.com/oauth/v2/auth?" + new URLSearchParams({
@@ -195,57 +163,20 @@
             miitelWidget.hangup();
         }
 
+        // 応対履歴の固有ID（シーケンスID）取得イベント
+        function receiveSequenceId(e) {
+            sequenceId = e.sequenceId;
+            isSequenceIdProcessed = false;
+            //console.log("receiveSequenceId", sequenceId);
+            //URLのXXXXXXXを貴社の企業IDに置き換えてご利用ください。
+            // document.getElementById("sequenceId").innerHTML = "https://XXXXXXX.miitel.jp/app/call/" + e.sequenceId;
+            
+            document.getElementById("sequenceId").innerHTML = e.sequenceId;
+        }
+        miitelWidget("onReceiveSequenceId", receiveSequenceId);
+
         // 着信パラメータの取得イベント
         function displayPhoneNumber(e) {
-            /*console.log("displayPhoneNumber");
-            console.log(e);
-            document.getElementById("incomingPhoneNumber").innerHTML = e.phoneNumber;
-            document.getElementById("incomingGroupName").innerHTML = e.groupName;
-            document.getElementById("incomingUserName").innerHTML = e.userName;
-            document.getElementById("incomingCircuitTitle").innerHTML = e.circuitTitle;
-            document.getElementById("incomingCircuitNumber").innerHTML = e.circuitNumber;
-            document.getElementById("incomingIsInternal").innerHTML = e.isInternal;
-            document.getElementById("incomingIsTransfer").innerHTML = e.isTransfer;
-            document.getElementById("incomingRemotePhoneNumber").innerHTML = e.remotePhoneNumber;
-
-            fetch("https://desk.zoho.com/api/v1/tickets", {
-                method: "POST",
-                body: JSON.stringify({
-                    subCategory: "Sub General",
-                    cf: {
-                        cf_mtl_phone_number : e.phoneNumber,
-                        cf_mtl_group_name : e.groupName,
-                        cf_mtl_username : e.userName,
-                        cf_mtl_circuit_title : e.circuitTitle,
-                        cf_mtl_circuit_number : e.circuitNumber,
-                        cf_mtl_is_internal : e.isInternal,
-                        cf_mtl_is_transfer : e.isTransfer,
-                        cf_mtl_remote_phone_number : e.remotePhoneNumber
-                    },
-                    contactId: "995116000000268029",
-                    subject: "Ticket " + Math.floor(100000000 + Math.random() * 900000000),
-                    dueDate: "2016-06-21T16:16:16.000Z",
-                    departmentId: "995116000000006907",
-                    channel: "Email",
-                    language: "English",
-                    priority: "High",
-                    classification: "",
-                    phone: e.phoneNumber,
-                    category: "general",
-                    status: "Open"
-                }),
-                headers: {
-                    "orgId": "854043261",
-                    "Authorization": "Zoho-oauthtoken " + localStorage.getItem("accessToken")
-                }
-                })
-                .then((response) => response.json())
-                .then((json) => {
-                    if(!isSequenceIdProcessed){
-                        isSequenceIdProcessed = true;
-                        insertMiitelZohoIdMapping(sequenceId, json.id, localStorage.getItem("accessToken"));
-                    }
-                });*/
 
                 console.log("Incoming call data:", e);
 
@@ -258,83 +189,6 @@
                 document.getElementById("incomingIsInternal").innerHTML = e.isInternal;
                 document.getElementById("incomingIsTransfer").innerHTML = e.isTransfer;
                 document.getElementById("incomingRemotePhoneNumber").innerHTML = e.remotePhoneNumber;
-
-                /*
-                const accessToken = localStorage.getItem("accessToken");
-                console.log(localStorage); 
-                if (!accessToken) {
-                    console.error("Access token is missing.");
-                    return;
-                }
-
-                // Create the headers object
-                const headers = {
-                    "Content-Type": "application/json",
-                    "orgId": "865953007", 
-                    "Authorization": "Zoho-oauthtoken " + accessToken 
-                };
-
-                console.log("Headers:", headers);
-                console.log("Access Token:", accessToken);
-
-                // Set the due date dynamically (for example, 1 day from now)
-                const dueDate = new Date();
-                dueDate.setDate(dueDate.getDate() + 1);  // Set due date 1 day from now
-                const formattedDueDate = dueDate.toISOString();
-
-                // Prepare the payload for the API request
-                const ticketPayload = {
-                    subject: "Ticket from Phone Number: " + e.phoneNumber,
-                    contactId: "1040287000000287180",  // Replace with your actual contact ID
-                    departmentId: "1040287000000006907",  // Replace with your actual department ID
-                    description: "Ticket created for phone number: " + e.phoneNumber,
-                    priority: "High",
-                    status: "Open",
-                    channel: "Phone",
-                    phone: e.phoneNumber,  // Use phone number directly
-                    dueDate: formattedDueDate  // Set due date for 1 day from now
-                };
-
-                console.log("Payload:", ticketPayload);
-
-                // Make the API request to create a ticket
-                fetch("https://desk.zoho.com/api/v1/tickets", {
-                    method: "POST",
-                    headers: headers,
-                    body: JSON.stringify(ticketPayload)
-                    
-                })
-                /*.then((response) => {
-                 if (!response.ok) {
-                    return response.json().then((errorData) => {
-                            console.error("Error creating ticket:", errorData);
-                            throw new Error("Failed to create ticket: " + errorData.message);
-                        });
-                    }
-                    return response.json();
-                })
-                .then((json) => {
-                if (!isSequenceIdProcessed) {
-                        isSequenceIdProcessed = true;
-                        insertMiitelZohoIdMapping(sequenceId, json.id, accessToken);
-                    }
-                })
-
-                .then(data => {
-                    console.log('Ticket created successfully:', data);
-                })
-
-                .catch((error) => {
-                    console.error("There was a problem with the fetch operation:", error);
-                });
-
-                .then(response => response.json())
-                .then(data => {
-                    console.log("Ticket created successfully:", data);
-                })
-                .catch(error => {
-                    console.error("There was a problem with the fetch operation:", error);
-                });*/
 
                 const accessToken = localStorage.getItem("accessToken");
 
@@ -355,6 +209,7 @@
                         phoneNumber: phoneNumber
                     })
                 })
+
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {
@@ -393,17 +248,6 @@
         }
         miitelWidget("onChangeReadyState", updateReadyState);
 
-        // 応対履歴の固有ID（シーケンスID）取得イベント
-        function receiveSequenceId(e) {
-            sequenceId = e.sequenceId;
-            isSequenceIdProcessed = false;
-            console.log("receiveSequenceId", sequenceId);
-            //URLのXXXXXXXを貴社の企業IDに置き換えてご利用ください。
-            // document.getElementById("sequenceId").innerHTML = "https://XXXXXXX.miitel.jp/app/call/" + e.sequenceId;
-            
-            document.getElementById("sequenceId").innerHTML = e.sequenceId;
-        }
-
         // ダイヤル開始イベント
         function dialBegin(e) {
             console.log("dialBegin");
@@ -419,7 +263,6 @@
             console.log("callEnd");
         }
 
-        miitelWidget("onReceiveSequenceId", receiveSequenceId);
         miitelWidget("onDialBegin", dialBegin);
         miitelWidget("onCallBegin", callBegin);
         miitelWidget("onCallEnd", callEnd);
