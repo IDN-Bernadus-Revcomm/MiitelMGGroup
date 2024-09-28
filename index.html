@@ -197,6 +197,7 @@
                     return;
                 } 
                 const phoneNumber = e.phoneNumber; 
+                const sequenceNumberForTicket = sequenceNumber;
 
                 fetch('https://zoho-auth-backend.onrender.com/create-ticket', {
                     method: 'POST',
