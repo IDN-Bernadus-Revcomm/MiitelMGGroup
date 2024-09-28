@@ -75,7 +75,7 @@
    <!-- end miitel widget  -->
 
     <script>
-        let sequenceId = null;
+        const sequenceNumber = null;
         /*let sequenceId;
         let isSequenceIdProcessed = false;
 
@@ -165,13 +165,13 @@
 
         // 応対履歴の固有ID（シーケンスID）取得イベント
         function receiveSequenceId(e) {
-            sequenceId = e.sequenceId;
+            sequenceNumber = e.sequenceId;
             isSequenceIdProcessed = false;
             //console.log("receiveSequenceId", sequenceId);
             //URLのXXXXXXXを貴社の企業IDに置き換えてご利用ください。
             // document.getElementById("sequenceId").innerHTML = "https://XXXXXXX.miitel.jp/app/call/" + e.sequenceId;
             
-            document.getElementById("sequenceId").innerHTML = e.sequenceId;
+            document.getElementById("sequenceId").innerHTML = sequenceNumber;
         }
         miitelWidget("onReceiveSequenceId", receiveSequenceId);
 
@@ -205,7 +205,7 @@
                     },
                     body: JSON.stringify({
                         accessToken: accessToken,
-                        sequenceId: sequenceId,
+                        sequenceId: sequenceNumber,
                         phoneNumber: phoneNumber
                     })
                 })
