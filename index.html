@@ -8,46 +8,6 @@
 </head>
 
     <body onload="requestAuthorization()">
-    <!--<h1> Widget Embedded</h1>
-    <table border="1" width="80%">
-        <tr>
-            <th>Company Name</th>
-            <th>Full Name</th>
-            <th>Department</th>
-            <th>Contact Address</th>
-        </tr>
-        <tr>
-            <td>PT. A</td>
-            <td>Radif</td>
-            <td>IT Department</td>
-            <td><a href="javascript:miitelWidget.call('081316550090');">081316550090</a></td>
-        </tr>
-        <tr>
-            <td>PT. B</td>
-            <td>Gito Wahyudi</td>
-            <td>Penipu Department</td>
-            <td><a href="#" onclick="outboundCall2('081316550090')">081316550090</a></td>
-        </tr>
-    </table><br />
-
-    <h4>Can you send a call?</h4>
-    <p>
-        State: <span id="readyState">false</span>
-    </p>
-
-    <h4>Outgoing</h4>
-    <p>
-        Phone Number<input type="text" id="outboundPhoneNumber" />
-        Company Name<input type="text" id="outboundCompanyName" />
-        PIC Name<input type="text" id="outboundContactPersonName" />
-        <button onClick="outboundCall()">Outgoing</button>
-    </p>
-
-    <h4>Call Ended</h4>
-    <p>
-        <button onClick="hangUpFunc()">Hang Up</button>
-    </p>
--->
 
     <h4>Unique ID (sequence ID) of call response history</h4>
     <p>
@@ -64,6 +24,7 @@
         <li>Is it an extension?：<span id="incomingIsInternal"></span></li>
         <li>Whether it is an extension transfer?：<span id="incomingIsTransfer"></span></li>
         <li>Transfer source phone number (only for internal transfer)：<span id="incomingRemotePhoneNumber"></span></li>
+        <li>Zoho Ticket Link : <span id="zohoTicketLink"></span></li>
     </ul>
     <!-- begin miitel widget  -->
     <script>
@@ -75,7 +36,6 @@
    <!-- end miitel widget  -->
 
     <script>
-        let sequenceNumber;
         /*let sequenceId;
         let isSequenceIdProcessed = false;
 
@@ -87,6 +47,17 @@
                 console.error("Element with id 'readyState' not found.");
             }
         }*/
+
+        let sequenceNumber;
+        
+        window.onload = function() {
+            const accessToken = checkIfTokenExpired();
+
+            if (accessToken) {
+                // Continue with your app logic here if the token is valid
+                console.log("Access token:", accessToken);
+            }
+        };
 
         function checkIfTokenExpired() {
 
@@ -124,15 +95,6 @@
             window.location.href = authUrl;
         }
 
-        window.onload = function() {
-            const accessToken = checkIfTokenExpired();
-
-            if (accessToken) {
-                // Continue with your app logic here if the token is valid
-                console.log("Access token:", accessToken);
-            }
-        };
-
         function onAuthorizationSuccess(accessToken) {
             console.log('Authorization successful, new access token:', accessToken);
             localStorage.setItem("accessToken", accessToken);
@@ -145,31 +107,10 @@
             console.log('Token expiration time set to:', expirationTime);
         }
 
-        // 架電イベント　入力発信
-        function outboundCall() {
-            var phoneNumber = document.getElementById("outboundPhoneNumber").value;
-            var companyName = document.getElementById("outboundCompanyName").value;
-            var contactPersonName = document.getElementById("outboundContactPersonName").value;
-            miitelWidget.call(phoneNumber, { contact: { companyName, contactPersonName} });
-        }
-
-        // 架電イベント2 クリックtoコール
-        function outboundCall2(phoneNumber) {
-            miitelWidget.call(phoneNumber);
-        }
-
-        // 通話終了イベント
-        function hangUpFunc(){
-            miitelWidget.hangup();
-        }
-
         // 応対履歴の固有ID（シーケンスID）取得イベント
         function receiveSequenceId(e) {
             sequenceNumber = e.sequenceId;
             isSequenceIdProcessed = false;
-            //console.log("receiveSequenceId", sequenceId);
-            //URLのXXXXXXXを貴社の企業IDに置き換えてご利用ください。
-            // document.getElementById("sequenceId").innerHTML = "https://XXXXXXX.miitel.jp/app/call/" + e.sequenceId;
             
             document.getElementById("sequenceId").innerHTML = sequenceNumber;
         }
@@ -217,6 +158,9 @@
                         console.error("Error creating ticket:", data);
                     } else {
                         console.log("Ticket created successfully:", data);
+
+                        const ticketLink = data.webUrl; // Assuming "webUrl" is part of the response
+                        document.getElementById("zohoTicketLink").innerHTML = `<a href="${ticketLink}" target="_blank">View Ticket</a>`;
                     }
                 })
                 .catch(error => {
@@ -241,32 +185,6 @@
                 .then((response) => response.json())
                 .then((json) => console.log('insert ', json));*/
         }
-
-        // ステータス更新イベント
-        function updateReadyState(e) {
-            console.log("updateReadyState")
-            document.getElementById("readyState").innerHTML = e.state;
-        }
-        miitelWidget("onChangeReadyState", updateReadyState);
-
-        // ダイヤル開始イベント
-        function dialBegin(e) {
-            console.log("dialBegin");
-        }
-
-        // コール開始イベント
-        function callBegin(e) {
-            console.log("callBegin");
-        }
-
-        // コール終了イベント
-        function callEnd(e) {
-            console.log("callEnd");
-        }
-
-        miitelWidget("onDialBegin", dialBegin);
-        miitelWidget("onCallBegin", callBegin);
-        miitelWidget("onCallEnd", callEnd);
 
     </script>
 </body>
