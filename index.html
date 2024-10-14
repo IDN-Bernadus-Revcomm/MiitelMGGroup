@@ -171,6 +171,23 @@
         }
         miitelWidget("onReceiveCall", displayPhoneNumber);
 
+        function callEnd(e){
+            // Clear the sequence ID
+            document.getElementById("sequenceId").innerHTML = "";
+
+            // Clear incoming call information
+            document.getElementById("incomingPhoneNumber").innerHTML = "";
+            document.getElementById("incomingGroupName").innerHTML = "";
+            document.getElementById("incomingUserName").innerHTML = "";
+            document.getElementById("incomingCircuitTitle").innerHTML = "";
+            document.getElementById("incomingCircuitNumber").innerHTML = "";
+            document.getElementById("incomingIsInternal").innerHTML = "";
+            document.getElementById("incomingIsTransfer").innerHTML = "";
+            document.getElementById("incomingRemotePhoneNumber").innerHTML = "";
+            document.getElementById("zohoTicketLink").innerHTML = "";
+        }
+        miitelWidget("onCallEnd", callEnd); 
+
         function insertMiitelZohoIdMapping(miitel_id, zoho_ticket_id, access_token){
             /*fetch("https://miitel-be.onrender.com/api/sqlDataMapping/insertMiitelZohoIdMapping", {
                 method: "POST",
