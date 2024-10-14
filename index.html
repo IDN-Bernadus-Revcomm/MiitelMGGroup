@@ -120,6 +120,7 @@
         function displayPhoneNumber(e) {
 
                 console.log("Incoming call data:", e);
+                console.log("Sequence ID:", document.getElementById("sequenceId").innerHTML);
 
                 // Update UI with incoming data
                 document.getElementById("incomingPhoneNumber").innerHTML = e.phoneNumber;
