@@ -138,7 +138,8 @@
                     return;
                 } 
                 const phoneNumber = e.phoneNumber; 
-                const sequenceNumberForTicket = sequenceNumber;
+                //const sequenceNumberForTicket = sequenceNumber;
+                const sequenceNumberForTicket = document.getElementById("sequenceId").innerHTML;
 
                 fetch('https://zoho-auth-backend.onrender.com/create-ticket', {
                     method: 'POST',
